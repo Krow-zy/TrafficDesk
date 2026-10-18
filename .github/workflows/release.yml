@@ -1,0 +1,66 @@
+name: Release build
+
+# Builds and packages the tag, and uploads the archive as a workflow artifact.
+# Publishing the GitHub Release is a deliberate manual step so it is attributed
+# to a person rather than to github-actions[bot]:
+#
+#   gh workflow run release.yml            # or: git push origin v0.1.0
+#   gh run download <run-id> -n TrafficDesk-windows-x64
+#   gh release create v0.1.0 TrafficDesk-v0.1.0-windows-x64.zip --title v0.1.0 --generate-notes
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('Cargo.lock') }}
+
+      - name: Tests
+        run: cargo test --release
+
+      - name: Build
+        run: cargo build --release
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $tag = '${{ github.ref_name }}'
+          $version = (Select-String -Path Cargo.toml -Pattern '^version\s*=\s*"(.+)"').Matches.Groups[1].Value
+          if ($tag.StartsWith('v') -and $tag -ne "v$version") {
+            throw "tag $tag does not match the Cargo.toml version $version"
+          }
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Copy-Item target/release/trafficdesk.exe dist/
+          Copy-Item README.md, LICENSE dist/
+          Compress-Archive -Path dist/* -DestinationPath "dist/TrafficDesk-$tag-windows-x64.zip"
+
+      - name: Upload the archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: TrafficDesk-windows-x64
+          path: dist/*.zip
+          if-no-files-found: error
+
+      - name: Next step
+        shell: pwsh
+        run: |
+          $tag = '${{ github.ref_name }}'
+          Write-Host "Archive ready: dist/TrafficDesk-$tag-windows-x64.zip"
+          Write-Host "Publish it manually so the release is attributed to you:"
+          Write-Host "  gh release create $tag dist/TrafficDesk-$tag-windows-x64.zip --title $tag --generate-notes"

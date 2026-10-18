@@ -1,0 +1,49 @@
+[package]
+name = "trafficdesk"
+version = "0.1.0"
+edition = "2024"
+description = "Floating Windows network traffic monitor with cache-only domain naming"
+license = "MIT"
+repository = "https://github.com/Krow-zy/TrafficDesk"
+readme = "README.md"
+keywords = ["network", "monitor", "windows", "tray", "egui"]
+categories = ["gui", "os::windows-apis"]
+rust-version = "1.93"
+publish = false
+
+[dependencies]
+# Newer eframe releases need rustc 1.95+ or changed the App trait; 0.33 builds
+# on the installed 1.93 toolchain with the small glow backend.
+eframe = "0.33"
+tray-icon = "0.26"
+rusqlite = { version = "0.40", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+toml = "1"
+log = "0.4"
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_NetworkManagement_IpHelper",
+    "Win32_NetworkManagement_Ndis",
+    "Win32_Networking_WinSock",
+    "Win32_Security",
+    "Win32_System_Diagnostics_ToolHelp",
+    "Win32_System_SystemInformation",
+    "Win32_System_Threading",
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_WindowsAndMessaging",
+] }
+# Only for the WMI types the DNS cache lives behind; windows-sys ships no COM
+# interfaces, and hand-writing the vtable of IWbemServices is not worth it.
+windows = { version = "0.61", features = [
+    "Win32_System_Com",
+    "Win32_System_Ole",
+    "Win32_System_Variant",
+    "Win32_System_Wmi",
+] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+panic = "unwind"

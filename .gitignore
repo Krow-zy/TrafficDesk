@@ -1,0 +1,19 @@
+# Build output
+/target
+
+# Release packaging (same layout the workflow uses)
+/dist
+
+# Runtime data belongs in %TEMP%\TrafficDesk (or $TRAFFICDESK_DATA_DIR),
+# never next to the sources. Ignore it anyway so a stray run cannot leak it.
+config.toml
+*.log
+*.db
+*.db-wal
+*.db-shm
+
+# Windows build leftovers
+*.pdb
+*.d
+*.exe
+*.res
