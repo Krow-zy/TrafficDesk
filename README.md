@@ -5,7 +5,8 @@
 <h1 align="center">TrafficDesk</h1>
 
 <p align="center">
-  A small always-on-top window that answers "what is my machine talking to, right now?"
+  Floating always-on-top Windows network monitor: live TCP peers, hostnames from the DNS
+  cache, 14 days of history in SQLite. No driver, no admin rights, no packet capture.
 </p>
 
 <p align="center">
@@ -15,14 +16,23 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078d4.svg" alt="Windows 10 and 11">
 </p>
 
-It lists live TCP connections per remote endpoint, shows the process behind each one,
-resolves endpoints to hostnames from the Windows DNS client cache, and records 14 days
-of history so a peer that was busy an hour ago is still labelled.
+TrafficDesk answers one question: what is this machine talking to, right now? Each row is
+one live TCP peer: the remote endpoint, the process behind it, and a hostname when Windows
+knows one. The numbers come from kernel tables and the DNS client cache, and every peer is
+remembered in SQLite so one that was busy an hour ago is still labelled.
 
 ![TrafficDesk expanded mode](docs/expanded.png)
 
-No driver, no admin rights, no packet capture. It reads what Windows already keeps
-in kernel tables and in its DNS cache.
+## Contents
+
+- [Modes](#modes)
+- [How it works](#how-it-works)
+- [Privacy](#privacy)
+- [Data and config](#data-and-config)
+- [Run it](#run-it)
+- [Build from source](#build-from-source)
+- [Limits, stated plainly](#limits-stated-plainly)
+- [License](#license)
 
 ## Modes
 
